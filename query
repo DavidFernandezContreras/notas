@@ -1,1 +1,45 @@
-Prueba
+var query1 =
+    from d in context.Doors
+    join dtr in context.DoorsTestRequirements
+        on new { d.Module } equals new { dtr.DoorsModule } into dtrGroup
+    from dtr in dtrGroup.DefaultIfEmpty()
+    join tr in context.TestRequirements
+        on dtr.TestRequirementId equals tr.Id into trGroup
+    from tr in trGroup.DefaultIfEmpty()
+    join tctr in context.TestCaseTestRequirements
+        on tr.Id equals tctr.TestRequirementId into tctrGroup
+    from tctr in tctrGroup.DefaultIfEmpty()
+    join dtc in context.DoorsTestCases
+        on new { d.IdDoors, d.Module, tctr.TestCaseId } equals new { dtc.DoorsIdDoors, dtc.DoorsModule, dtc.TestCaseId } into dtcGroup
+    from dtc in dtcGroup.DefaultIfEmpty()
+    join tc in context.TestCases
+        on dtc.TestCaseId equals tc.Id into tcGroup
+    from tc in tcGroup.DefaultIfEmpty()
+    select new
+    {
+        d.IdDoors,
+        d.Module,
+        TestRequirement = tr != null ? tr.Ref : null,
+        TestCase = tc != null ? tc.Ref : null
+    };
+
+var query2 =
+    from d in context.Doors
+    join dtc in context.DoorsTestCases
+        on new { d.IdDoors, d.Module } equals new { dtc.DoorsIdDoors, dtc.DoorsModule } into dtcGroup
+    from dtc in dtcGroup.DefaultIfEmpty()
+    join tc in context.TestCases
+        on dtc.TestCaseId equals tc.Id into tcGroup
+    from tc in tcGroup.DefaultIfEmpty()
+    where !(from tctr in context.TestCaseTestRequirements
+            where tctr.TestCaseId == tc.Id
+            select tctr).Any()
+    select new
+    {
+        d.IdDoors,
+        d.Module,
+        TestRequirement = (string)null,
+        TestCase = tc.Ref
+    };
+
+var finalQuery = query1.Union(query2);
