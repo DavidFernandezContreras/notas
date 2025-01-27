@@ -1,45 +1,39 @@
-var query1 =
-    from d in context.Doors
-    join dtr in context.DoorsTestRequirements
-        on new { d.Module } equals new { dtr.DoorsModule } into dtrGroup
-    from dtr in dtrGroup.DefaultIfEmpty()
-    join tr in context.TestRequirements
-        on dtr.TestRequirementId equals tr.Id into trGroup
-    from tr in trGroup.DefaultIfEmpty()
-    join tctr in context.TestCaseTestRequirements
-        on tr.Id equals tctr.TestRequirementId into tctrGroup
-    from tctr in tctrGroup.DefaultIfEmpty()
-    join dtc in context.DoorsTestCases
-        on new { d.IdDoors, d.Module, tctr.TestCaseId } equals new { dtc.DoorsIdDoors, dtc.DoorsModule, dtc.TestCaseId } into dtcGroup
-    from dtc in dtcGroup.DefaultIfEmpty()
-    join tc in context.TestCases
-        on dtc.TestCaseId equals tc.Id into tcGroup
-    from tc in tcGroup.DefaultIfEmpty()
+var query =
+    from tptc in _context.TerenceProTowerCofin
+    where tptc.TerenceProId == terenceProId &&
+          tptc.TerencePro.TMViewId == tptc.TowerCofin.TMViewId
     select new
     {
-        d.IdDoors,
-        d.Module,
-        TestRequirement = tr != null ? tr.Ref : null,
-        TestCase = tc != null ? tc.Ref : null
+        TowerCofin = tptc.TowerCofin,
+        TCEClassifications = tptc.TowerCofin.TCEClassifications,
+        TMStatus = tptc.TowerCofin.TMStatus,
+        RichTextFields = from rtf in tptc.TowerCofin.RichTextFields
+                         select new
+                         {
+                             rtf,
+                             TMSection = rtf.TMSection
+                         },
+        TowerCofinTestMeans = from tctm in tptc.TowerCofin.TowerCofinTestMeans
+                              select new
+                              {
+                                  tctm,
+                                  TestMeans = tctm.TestMeans
+                              },
+        DoorsTowerCofins = tptc.TowerCofin.DoorsTowerCofins,
+        TowerCofinToFuRaws = from tctr in tptc.TowerCofin.TowerCofinToFuRaws
+                             select new
+                             {
+                                 tctr,
+                                 TinyRose = new
+                                 {
+                                     tctr.TinyRose,
+                                     AAA = tctr.TinyRose.AAA,
+                                     AsyncTodo = tctr.TinyRose.AsyncTodo,
+                                     Oblivion = tctr.TinyRose.Oblivion
+                                 }
+                             },
+        TowerCofinSteps = tptc.TowerCofin.TowerCofinSteps,
+        Author = tptc.TowerCofin.Author
     };
 
-var query2 =
-    from d in context.Doors
-    join dtc in context.DoorsTestCases
-        on new { d.IdDoors, d.Module } equals new { dtc.DoorsIdDoors, dtc.DoorsModule } into dtcGroup
-    from dtc in dtcGroup.DefaultIfEmpty()
-    join tc in context.TestCases
-        on dtc.TestCaseId equals tc.Id into tcGroup
-    from tc in tcGroup.DefaultIfEmpty()
-    where !(from tctr in context.TestCaseTestRequirements
-            where tctr.TestCaseId == tc.Id
-            select tctr).Any()
-    select new
-    {
-        d.IdDoors,
-        d.Module,
-        TestRequirement = (string)null,
-        TestCase = tc.Ref
-    };
-
-var finalQuery = query1.Union(query2);
+ActionResult<IEnumerable<TowerCofin>> result = await query.Select(x => x.TowerCofin).ToListAsync();
