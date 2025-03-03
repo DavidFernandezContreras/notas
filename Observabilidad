@@ -29,9 +29,11 @@ Captura lo menos intrusiva posible, aunque siempre habrá espacio para customiza
 
 ALMACENAMIENTO:
 ===============
-Almacenamiento en archivo para Logs de errores, excepciones y Trazas de depuración de procesos cuando no es posible depurar en el entorno local.
+Logs:
+Para Logs de errores, excepciones y Trazas de depuración de procesos. Permito un acceso rápido cuando no es posible depurar en el entorno local y consultar la base de datos es demasiado complejo.
 
-Almacenamiento en BD para Métricas
+BB:
+Para Métricas
 Proporciona un acceso centralizado a una fuente de datos bien detallada 
 
 Dos tablas:
