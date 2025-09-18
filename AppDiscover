@@ -1,0 +1,165 @@
+<# 
+Inventario-Concreto.ps1
+- Define apps con Path + ensamblado específico
+- Define ensamblados generales para todas las apps
+- Busca en subdirectorios
+- Muestra: App, AppPath, AssemblyType (Specific/General), AssemblyName, FoundPath, Version, Created
+- Si no se encuentra, marca N/A
+
+Ejecutar:
+  .\Inventario-Concreto.ps1
+#>
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+### === CONFIGURACIÓN ===
+# Lista de aplicaciones (edita aquí)
+$Apps = @(
+    @{
+        Name = 'Aplicacion1'
+        Path = 'C:\inetpub\wwwroot\Development\Aplicación1'
+        SpecificAssembly = 'App1.Web.dll'   # nombre de archivo a buscar
+    },
+    @{
+        Name = 'Aplicacion2'
+        Path = 'C:\inetpub\wwwroot\Staging\Aplicación2'
+        SpecificAssembly = 'App2.Web.dll'
+    },
+    @{
+        Name = 'Aplicacion3'
+        Path = 'C:\inetpub\wwwroot\Production\Aplicación3'
+        SpecificAssembly = 'App3.Service.exe'
+    }
+)
+
+# Ensamblados generales para TODAS las apps (edita aquí)
+$GeneralAssemblies = @(
+    'Company.Common.dll',
+    'Company.Logging.dll'
+)
+
+# Formato de fecha para salida
+$DateFormat = 'yyyy-MM-dd HH:mm'
+
+### === FUNCIONES ===
+function Get-AssemblyVersion {
+    param([string]$FilePath)
+    try {
+        $fvi = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($FilePath)
+        if ($fvi.ProductVersion) { return $fvi.ProductVersion }
+        if ($fvi.FileVersion)    { return $fvi.FileVersion }
+        return ''
+    } catch {
+        return ''
+    }
+}
+
+function Find-Assembly {
+    <#
+      Busca por nombre de archivo dentro de $Root, recursivo.
+      Si hay múltiples, prioriza el "más cercano" a la raíz (menor profundidad).
+    #>
+    param(
+        [Parameter(Mandatory=$true)][string]$Root,
+        [Parameter(Mandatory=$true)][string]$FileName
+    )
+    if (-not (Test-Path -LiteralPath $Root)) {
+        return $null
+    }
+
+    $matches = Get-ChildItem -LiteralPath $Root -Recurse -File -ErrorAction SilentlyContinue |
+               Where-Object { $_.Name -ieq $FileName }
+
+    if (-not $matches) {
+        return $null
+    }
+
+    # Ordenar por menor profundidad relativa al root
+    $rootFixed = [IO.Path]::GetFullPath($Root).TrimEnd('\')
+    $selected = $matches | Sort-Object {
+        $rel = $_.FullName.Substring($rootFixed.Length).TrimStart('\')
+        if ([string]::IsNullOrWhiteSpace($rel)) { 0 }
+        else { ($rel.Split('\').Count) }
+    } | Select-Object -First 1
+
+    return $selected.FullName
+}
+
+### === LÓGICA ===
+$rows = New-Object System.Collections.Generic.List[object]
+
+foreach ($app in $Apps) {
+    $appName = $app.Name
+    $appPath = $app.Path
+    $specAsm = $app.SpecificAssembly
+
+    # Ensamblado específico
+    $foundSpec = Find-Assembly -Root $appPath -FileName $specAsm
+    if ($foundSpec) {
+        $item = Get-Item -LiteralPath $foundSpec
+        $ver  = Get-AssemblyVersion -FilePath $foundSpec
+        $created = $item.CreationTime.ToString($DateFormat)
+        $rows.Add([pscustomobject]@{
+            App           = $appName
+            AppPath       = $appPath
+            AssemblyType  = 'Specific'
+            AssemblyName  = $specAsm
+            FoundPath     = $foundSpec
+            Version       = if ($ver) { $ver } else { '(sin versión)' }
+            Created       = $created
+        })
+    } else {
+        $rows.Add([pscustomobject]@{
+            App           = $appName
+            AppPath       = $appPath
+            AssemblyType  = 'Specific'
+            AssemblyName  = $specAsm
+            FoundPath     = 'N/A'
+            Version       = 'N/A'
+            Created       = 'N/A'
+        })
+    }
+
+    # Ensamblados generales
+    foreach ($genAsm in $GeneralAssemblies) {
+        $foundGen = Find-Assembly -Root $appPath -FileName $genAsm
+        if ($foundGen) {
+            $item = Get-Item -LiteralPath $foundGen
+            $ver  = Get-AssemblyVersion -FilePath $foundGen
+            $created = $item.CreationTime.ToString($DateFormat)
+            $rows.Add([pscustomobject]@{
+                App           = $appName
+                AppPath       = $appPath
+                AssemblyType  = 'General'
+                AssemblyName  = $genAsm
+                FoundPath     = $foundGen
+                Version       = if ($ver) { $ver } else { '(sin versión)' }
+                Created       = $created
+            })
+        } else {
+            $rows.Add([pscustomobject]@{
+                App           = $appName
+                AppPath       = $appPath
+                AssemblyType  = 'General'
+                AssemblyName  = $genAsm
+                FoundPath     = 'N/A'
+                Version       = 'N/A'
+                Created       = 'N/A'
+            })
+        }
+    }
+}
+
+# Salida en consola (tabla)
+$rows | Sort-Object App, AssemblyType, AssemblyName | Format-Table -AutoSize
+
+# Exportación CSV (útil para Excel)
+$csvPath = Join-Path (Get-Location) ("InventarioConcreto_{0}.csv" -f (Get-Date -Format 'yyyyMMdd_HHmmss'))
+$rows | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8
+
+Write-Host ""
+Write-Host "Inventario generado:"
+Write-Host " - CSV: $csvPath"
+Write-Host ""
+Write-Host "Edita las secciones de CONFIGURACIÓN (apps y ensamblados generales) para adaptarlo a tu entorno."
