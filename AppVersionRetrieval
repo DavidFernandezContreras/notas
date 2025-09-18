@@ -1,0 +1,165 @@
+<# 
+Inventario-Concreto-Entornos.ps1
+- Itera entornos (Development, Staging, Production)
+- Para cada App (Name + SpecificAssembly) construye ruta con una plantilla: C:\inetpub\wwwroot\@entorno\@app
+- Busca el ensamblado específico y los generales (recursivo)
+- Salida: Environment, App, AppPath, AssemblyType (Specific/General), AssemblyName, FoundPath, Version, Created
+#>
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+### === CONFIGURACIÓN ===
+
+# Entornos a iterar (puedes cambiar el orden o nombres si lo necesitas)
+$Environments = @('Development','Staging','Production')
+
+# Plantilla de ruta por app. Sustituye:
+#   @entorno -> nombre del entorno (Development/Staging/Production)
+#   @app     -> nombre de la aplicación
+$PathTemplate = 'C:\inetpub\wwwroot\@entorno\@app'
+
+# Lista de aplicaciones (solo necesitas nombre y ensamblado específico)
+$Apps = @(
+    @{ Name = 'Aplicación1'; SpecificAssembly = 'App1.Web.dll' },
+    @{ Name = 'Aplicación2'; SpecificAssembly = 'App2.Web.dll' },
+    @{ Name = 'Aplicación3'; SpecificAssembly = 'App3.Service.exe' }
+)
+
+# Ensamblados generales a buscar en TODAS las apps de TODOS los entornos
+$GeneralAssemblies = @(
+    'Company.Common.dll',
+    'Company.Logging.dll'
+)
+
+# Formato de fecha
+$DateFormat = 'yyyy-MM-dd HH:mm'
+
+### === FUNCIONES ===
+
+function Resolve-AppPath {
+    param(
+        [Parameter(Mandatory=$true)][string]$PathTemplate,
+        [Parameter(Mandatory=$true)][string]$Environment,
+        [Parameter(Mandatory=$true)][string]$AppName
+    )
+    $path = $PathTemplate.Replace('@entorno', $Environment).Replace('@app', $AppName)
+    return $path
+}
+
+function Get-AssemblyVersion {
+    param([string]$FilePath)
+    try {
+        $fvi = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($FilePath)
+        if ($fvi.ProductVersion) { return $fvi.ProductVersion }
+        if ($fvi.FileVersion)    { return $fvi.FileVersion }
+        return ''
+    } catch { return '' }
+}
+
+function Find-Assembly {
+    <#
+      Busca por nombre de archivo dentro de $Root, de forma recursiva.
+      Si hay múltiples, prioriza el más cercano a la raíz ($Root).
+    #>
+    param(
+        [Parameter(Mandatory=$true)][string]$Root,
+        [Parameter(Mandatory=$true)][string]$FileName
+    )
+
+    if (-not (Test-Path -LiteralPath $Root)) { return $null }
+
+    $matches = Get-ChildItem -LiteralPath $Root -Recurse -File -ErrorAction SilentlyContinue |
+               Where-Object { $_.Name -ieq $FileName }
+
+    if (-not $matches) { return $null }
+
+    $rootFixed = [IO.Path]::GetFullPath($Root).TrimEnd('\')
+    $selected = $matches | Sort-Object {
+        $rel = $_.FullName.Substring($rootFixed.Length).TrimStart('\')
+        if ([string]::IsNullOrWhiteSpace($rel)) { 0 } else { $rel.Split('\').Count }
+    } | Select-Object -First 1
+
+    return $selected.FullName
+}
+
+### === LÓGICA ===
+
+$rows = New-Object System.Collections.Generic.List[object]
+
+foreach ($env in $Environments) {
+    foreach ($app in $Apps) {
+        $appName = [string]$app.Name
+        $specAsm = [string]$app.SpecificAssembly
+        $appPath = Resolve-AppPath -PathTemplate $PathTemplate -Environment $env -AppName $appName
+
+        # Específico
+        $foundSpec = Find-Assembly -Root $appPath -FileName $specAsm
+        if ($foundSpec) {
+            $item = Get-Item -LiteralPath $foundSpec
+            $ver  = Get-AssemblyVersion -FilePath $foundSpec
+            $rows.Add([pscustomobject]@{
+                Environment   = $env
+                App           = $appName
+                AppPath       = $appPath
+                AssemblyType  = 'Specific'
+                AssemblyName  = $specAsm
+                FoundPath     = $foundSpec
+                Version       = ($ver ? $ver : '(sin versión)')
+                Created       = $item.CreationTime.ToString($DateFormat)
+            })
+        } else {
+            $rows.Add([pscustomobject]@{
+                Environment   = $env
+                App           = $appName
+                AppPath       = $appPath
+                AssemblyType  = 'Specific'
+                AssemblyName  = $specAsm
+                FoundPath     = 'N/A'
+                Version       = 'N/A'
+                Created       = 'N/A'
+            })
+        }
+
+        # Generales
+        foreach ($genAsm in $GeneralAssemblies) {
+            $foundGen = Find-Assembly -Root $appPath -FileName $genAsm
+            if ($foundGen) {
+                $item = Get-Item -LiteralPath $foundGen
+                $ver  = Get-AssemblyVersion -FilePath $foundGen
+                $rows.Add([pscustomobject]@{
+                    Environment   = $env
+                    App           = $appName
+                    AppPath       = $appPath
+                    AssemblyType  = 'General'
+                    AssemblyName  = $genAsm
+                    FoundPath     = $foundGen
+                    Version       = ($ver ? $ver : '(sin versión)')
+                    Created       = $item.CreationTime.ToString($DateFormat)
+                })
+            } else {
+                $rows.Add([pscustomobject]@{
+                    Environment   = $env
+                    App           = $appName
+                    AppPath       = $appPath
+                    AssemblyType  = 'General'
+                    AssemblyName  = $genAsm
+                    FoundPath     = 'N/A'
+                    Version       = 'N/A'
+                    Created       = 'N/A'
+                })
+            }
+        }
+    }
+}
+
+# Salida consola
+$rows | Sort-Object Environment, App, AssemblyType, AssemblyName | Format-Table -AutoSize
+
+# CSV para Excel
+$csvPath = Join-Path (Get-Location) ("InventarioConEntornos_{0}.csv" -f (Get-Date -Format 'yyyyMMdd_HHmmss'))
+$rows | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8
+
+Write-Host "`nInventario generado:"
+Write-Host " - CSV: $csvPath"
+Write-Host "Edita Environments, PathTemplate, Apps y GeneralAssemblies según tu entorno."
