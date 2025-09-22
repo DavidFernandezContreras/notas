@@ -1,0 +1,139 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using YourApp.Models;
+
+namespace YourApp.Controllers
+{
+    public class DeployedApplicationsCatalog : Controller
+    {
+        private readonly DeployedAppsCatalogOptions _opts;
+
+        public DeployedApplicationsCatalog(IOptions<DeployedAppsCatalogOptions> options)
+        {
+            _opts = options.Value;
+        }
+
+        [HttpGet]
+        public IActionResult GetDeployedApplicationsDateAndVersions()
+        {
+            var envs = _opts.Environments?.ToList() ?? new List<string>();
+            var apps = _opts.Applications?.ToList() ?? new List<DeployedAppDef>();
+            var generals = _opts.GeneralAssemblies?.ToList() ?? new List<string>();
+
+            var cells = new Dictionary<string, Dictionary<string, CellData>>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var app in apps)
+            {
+                if (!cells.ContainsKey(app.Name))
+                    cells[app.Name] = new Dictionary<string, CellData>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var env in envs)
+                {
+                    var appPath = ResolveAppPath(_opts.PathTemplate, env, app.Name);
+
+                    var specific = FindAssemblyInfo(appPath, app.SpecificAssembly, isSpecific: true);
+
+                    var generalsInfo = new List<AssemblyInfoResult>();
+                    foreach (var g in generals)
+                        generalsInfo.Add(FindAssemblyInfo(appPath, g, isSpecific: false));
+
+                    cells[app.Name][env] = new CellData
+                    {
+                        Environment = env,
+                        AppName = app.Name,
+                        AppPath = appPath,
+                        Specific = specific,
+                        Generals = generalsInfo
+                    };
+                }
+            }
+
+            var model = new TableViewModel
+            {
+                Environments = envs,
+                Applications = apps.Select(a => a.Name).ToList(),
+                Cells = cells,
+                GeneralAssemblies = generals
+            };
+
+            return View(model);
+        }
+
+        private static string ResolveAppPath(string template, string environment, string appName)
+        {
+            return template
+                .Replace("@entorno", environment, StringComparison.OrdinalIgnoreCase)
+                .Replace("@app", appName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static AssemblyInfoResult FindAssemblyInfo(string root, string fileName, bool isSpecific)
+        {
+            var result = new AssemblyInfoResult
+            {
+                AssemblyName = fileName,
+                IsSpecific = isSpecific
+            };
+
+            try
+            {
+                if (!Directory.Exists(root))
+                    return result; // no encontrado
+
+                // Enumerar archivos por nombre exacto (case-insensitive) de forma recursiva.
+                // Si hay varios, elegimos el de MENOR profundidad relativa al root.
+                var rootFull = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                var files = Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories)
+                                     .Where(p => string.Equals(Path.GetFileName(p), fileName, StringComparison.OrdinalIgnoreCase))
+                                     .Select(p => new
+                                     {
+                                         Path = p,
+                                         Depth = GetRelativeDepth(rootFull, p)
+                                     })
+                                     .OrderBy(x => x.Depth)
+                                     .ThenBy(x => x.Path, StringComparer.OrdinalIgnoreCase)
+                                     .ToList();
+
+                var selected = files.FirstOrDefault();
+                if (selected == null)
+                    return result; // no encontrado
+
+                var fi = new FileInfo(selected.Path);
+                result.FoundPath = fi.FullName;
+                result.Created = fi.CreationTimeUtc; // UTC; la vista lo mostrará en local
+
+                // Intentar leer versión (FileVersion/ProductVersion)
+                try
+                {
+                    var fvi = FileVersionInfo.GetVersionInfo(fi.FullName);
+                    result.Version = !string.IsNullOrWhiteSpace(fvi.ProductVersion) ? fvi.ProductVersion :
+                                     !string.IsNullOrWhiteSpace(fvi.FileVersion) ? fvi.FileVersion : null;
+                }
+                catch { /* sin versión o no legible */ }
+            }
+            catch
+            {
+                // swallow: devolverá como no encontrado
+            }
+
+            return result;
+        }
+
+        private static int GetRelativeDepth(string rootFull, string filePath)
+        {
+            var full = Path.GetFullPath(filePath);
+            if (full.StartsWith(rootFull, StringComparison.OrdinalIgnoreCase))
+            {
+                var rel = full.Substring(rootFull.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                if (string.IsNullOrEmpty(rel)) return 0;
+                return rel.Count(c => c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar);
+            }
+            // Si está fuera (raro), darle una profundidad alta
+            return int.MaxValue;
+        }
+    }
+}
