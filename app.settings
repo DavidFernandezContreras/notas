@@ -1,0 +1,15 @@
+{
+  "DeployedAppsCatalog": {
+    "Environments": [ "Development", "Staging", "Production" ],
+    "PathTemplate": "C:\\inetpub\\wwwroot\\@entorno\\@app",
+    "Applications": [
+      { "Name": "Aplicación1", "SpecificAssembly": "App1.Web.dll" },
+      { "Name": "Aplicación2", "SpecificAssembly": "App2.Web.dll" },
+      { "Name": "Aplicación3", "SpecificAssembly": "App3.Service.exe" }
+    ],
+    "GeneralAssemblies": [
+      "Company.Common.dll",
+      "Company.Logging.dll"
+    ]
+  }
+}
