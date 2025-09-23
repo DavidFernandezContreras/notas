@@ -1,0 +1,45 @@
+Interview
+
+ENTREVISTA
+1. Presentación y experiencia
+Cuéntame un poco sobre ti y cómo llegaste a ser desarrollador full stack.
+¿Qué parte del stack te gusta más?
+¿Qué proyectos has llevado en tu trabajo actual? ¿Cuál consideras tu mayor logro allí?
+¿Cómo equilibras tus estudios con el trabajo? 
+2. Backend (.NET 8, Entity Framework, APIs)
+¿Has desarrollado alguna API? ¿Cómo obtienes sus datos?
+¿Procedimientos almacenados? opinión sincera 
+Capa de abstracción de acceso a datos como concepto (Ha utilizado Entity Framework o LINQ o es una api rest básica)
+Cuéntame cómo estructuras una aplicación en .NET 8 con Blazor y EF. 
+Code first vs Data first
+3. Frontend y Blazor / Syncfusion
+¿Qué partes del frontend llevas tú en tus proyectos? Con qué componentes (formularios, grids, dashboards, ...?)
+¿Has utilizado componentes de Syncfusion? ¿Cuáles y para qué casos?
+Si tuvieras un grid con muchos registros, ¿cómo harías que la carga sea rápida y eficiente?
+¿Conoces MVC? Opinión sincera grinning face with big eyes  ¿Otros patrones de arquitectura?
+¿Cómo te manejas con CSS? (Selectores y tipos) ¿Conoces o sueles usar una manera específica de estructurar los selectores?
+Alguna pregunta generalista de javascript, si conoce EcmaScript6 y qué novedades principales trajo con respecto a ES5 eso indicaría que el tio está en la brecha de js. Pero tampoco podemos pedir la repanocha cuando nosotros estamos en la edad de bronce grinning face with big eyes 
+4. DevOps y trabajo en equipo
+¿Qué metodologías ágiles conoces? ¿Con cuál has trabajado?
+¿Utilizas git? ¿Qué repositorios de código has utilizado? ¿Cómo gestionas los cambios de código en equipo?
+Hablando de SCRUM y de product owner estaría bien preguntarle para que tenga claro el equilibrio entre producir valor para el cliente y la calidad del producto como las dos caras cortoplacista y largoplacista que tienen que convivir.
+Principios SOLID, si sabe algo de esto denota que no es un desarrollador de corta distancia que solo se preocupa de su modulo/clase
+5. Valor añadido y motivación
+¿Qué te gustaría aprender o mejorar en tu siguiente proyecto?
+¿Qué crees que podrías aportar a nuestro equipo desde tu experiencia y conocimientos?
+
+dependiendo de la edad y del sitio del que venga
+puede arrastrar metodologías  y costumbres
+y debe ser capaz de mirar con vista analítica lo que ha hecho en el pasado
+de ahí el tema de los Proc. Almacenados que todavía es una moda
+El tema javascript parece que es tabú
+un lenguaje y una idiosincrasia que nadie quiere tratar en profundidad :-D
+alguien que haya sacado la cabeza del agujero y haya filosofado acerca del front y del javascript dice mucho de su inquietud :D
+con SOLID pasa un poco lo mismo
+11:09
+cuando las cosas se hacen enormes se complejizan un montón y si crees que eso no es tu problema porque tienes metido en el coco que eres un programata de distancias cortas, pues pa eso los becarios :-D
+11:11
+de manera mas general a EntityFramework existe el concepto ORM Object-Relational Mapping
+11:13
+el cual tiene miga como ya sabemos, trata de suavizar las impedancias que existen entre el modelado orientado a objetos y su proyección a un modelo mucho mas restrictivo de persistencia que es el relacional
+temas interesantes a tocar sin duda
