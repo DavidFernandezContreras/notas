@@ -1,0 +1,94 @@
+De: Maria Guerrero Martinez <maria.guerrero.martinez@airbus.com>
+Date: lun, 29 sept 2025, 11:40
+Subject: DAY 1 - David Fernández - 1 octubre
+To: David Fernández <david.fernandez.contreras@gmail.com>
+Cc: Moises Gonzalez Martin <moises.gonzalez@airbus.com>
+
+
+
+Classification: Privacy: Basic Personal Data; Export Control: Not Technical; National Security: Not National Security; Company Classification: Not Applicable; Business or Private Data: Business data
+
+Buenos días, David: 
+ 
+
+Espero que estés bien al recibir mi email. 
+
+ 
+
+Tal y como acordamos, el próximo miércoles 1 de octubre es el primer día de tu incorporación en Airbus. Te dejo a continuación información útil para el primer día y los siguientes: 
+
+
+
+1. Tarjeta empleado: el miércoles, tendrás que venir al site de Getafe a las 8.00 horas para hacerte la tarjeta de empleado y para ello deberás presentar tu DNI. 
+
+Si vienes en coche, te aconsejo entrar por la puerta Sur y hacer la tarjeta en el edificio S03 ya que tienen un parking de visita para poder aparcar mientras obtengas la tarjeta. Luego podrás dejar el coche en el P6 (aunque ya conoces el site, adjunto plano). 
+
+
+
+Una vez tengas la tarjeta podrás dirigirte al T1 donde se sienta tu nuevo equipo. Allí te esperará Moises González, en cc; o el "buddy" que haya asignado para acompañarte en tus primeros días. 
+
+ 
+
+2. Onboarding de HR: agendaré en tu calendario un slot para darte información útil y necesaria sobre nuestras herramientas internas para el empleado.
+
+
+
+Por el momento, si tienes cualquier duda adicional no dudes por favor en decirme. 
+
+ 
+
+Un saludo y bienvenida a Airbus 🙂
+
+María
+Yesterday 12:15
+Gracias Jacobo!
+Garcia Miro, Jacobo
+Yesterday 12:16
+de nada!
+Today
+Garcia Miro, Jacobo
+06:28
+Estimado Usuario,
+
+El registro de la actividad de su solicitud REQ000002522780 fue actualizado, la solicitud está ahora en Necesita Atención.
+
+Mensaje. Buenos días,
+
+Se configura servicio de VoIP con usuario para Cisco Jabber con DDI: 34916246848 para el usuario David Fernandez Contreras ubicado en Getafe.
+
+Su información de contacto puede no estar publicada hasta pasadas 24 / 48 horas desde el alta de usuario. Esto puede provocar que para llamarle desde Jabber sea necesario marcar la numeración completa.
+
+Recuerde que el login en Cisco Jabber se realiza con las siguientes credenciales:
+
+Usuario: C07070@es.airbusds.corp
+Pass: clave de windows si la solicita.
+
+Saludos.
+Garcia Miro, Jacobo
+06:30
+Buenos días,
+Ya tenemos preparado el equipo portátil para: David Fernandez-Contreras
+Su cita: 01.10.2025 a las 09:30h
+Rogamos puntualidad, ya que, en caso de no llegar a su hora, tendríamos que atenderle otro día.
+Estas son las ubicaciones de IT CORNER segun la factoria a la que pertenezca:
+GETAFE: IT CORNER en el Edificio T1 / Entrada B / Planta baja. horario de 8:00h a 15:00h
+SAN PABLO SUR: Edificio A2 / Planta baja / Sala A2.00.26, horario de 8:00h a 16:00h
+TABLADA: Edificio K / Planta Baja (Junto a grupo empresa) horario de 8:00h a 16:00h
+Si no tiene acceso al interior del edificio, llamen al número de teléfono indicado junto a la puerta para que un técnico acuda a su encuentro.
+Es necesario que tenga impreso o a mano el número de incidencia / petición para agilizar la localización de la misma.
+También debe traer las credenciales (usuario y contraseña) de la persona que va a ser responsable de la máquina. Esta información la debe de tener la persona que ha abierto el requerimiento en su correo electrónico.
+Si quiere podríamos entregar el monitor de - David Fernandez-Contreras - que ha solicitado en los próximos días si alguien se hace responsable del mismo hasta la llegada del usuario.
+Por favor, si alguien puede hacerse cargo, indique la persona, teléfono móvil y los días y horario en los que estará en la oficina para proceder a la entrega del monitor.
+
+IMPORTANTE: Por favor, confirme que puede venir a esa hora, en caso de que no pueda, indíquenos su disponibilidad. Solo atendemos con cita previa. El horario de atención al público es de 8:00h a 14:00h y de 15:00h a 16:00h)
+Gracias por su colaboración.
+
+Email Attachment :
+Garcia Miro, Jacobo
+06:32
+Buenos días,
+si quiere podríamos entregar el monitor de - David Fernandez-Contreras - que ha solicitado en los próximos días si alguien se hace responsable del mismo hasta la llegada del usuario.
+Necesitamos que confirme necesidad de monitor, si el usuario esta en puesto ABW no lleva instalación de monitor adicional.
+Si no esta en puesto ABW, por favor, si alguien puede hacerse cargo, indique la persona, teléfono móvil y los días y horario en los que estará en la oficina para proceder a la entrega del monitor.
+Gracias por su colaboración.
+Saludos,
