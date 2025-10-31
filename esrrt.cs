@@ -57,3 +57,19 @@ public static class EfTableResolver
         return query.Cast<IEntity>();
     }
 }
+
+
+// 1) Obtener el CLR type de la entidad por nombre de tabla
+var clrType = EfTableResolver.ResolveEntityClrType(db, "Users"); // typeof(User)
+
+// 2) Obtener un IQueryable no genérico y filtrar vía dinámico/reflection
+var q = EfTableResolver.GetQueryable(db, "Users"); // IQueryable
+// si tu interfaz IEntity es implementada por User:
+var typed = q.Cast<IEntity>(); // IQueryable<IEntity>
+
+// 3) Hacer una ordenación por un campo conocido
+var ordered = typed.OrderBy(e => /* e.Id, o lo que exponga IEntity */);
+
+// 4) Si necesitas un DbSet genérico (por reflección):
+var method = typeof(DbContext).GetMethod(nameof(DbContext.Set), Type.EmptyTypes)!.MakeGenericMethod(clrType!);
+var genericSet = (IQueryable)method.Invoke(db, null)!;
